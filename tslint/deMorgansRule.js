@@ -1,33 +1,52 @@
 // @ts-check
 
 const Lint = require("tslint")
+const utils = require("tsutils")
 const ts = require("typescript")
 
+/*
+This is really cool: https://astexplorer.net
+*/
+
+// 
 class Rule extends Lint.Rules.AbstractRule {
   /**
    * @param {ts.SourceFile} sourceFile
    */
   apply(sourceFile) {
-    // Test files only
-    if (!sourceFile.fileName.includes(".test")) {
-      return []
-    }
-    // Does it include mockTracking but not un-mock react-tracking?
-    if (
-      sourceFile.text.includes("mockTracking") &&
-      !sourceFile.text.includes(`jest.unmock("react-tracking")`)
-    ) {
-      // Offer a fix-it, and show a message.
-      const message =
-        "You need to un-mock react-tracking if you are using mockTracking in this file."
-      const fix = new Lint.Fix("fix-tracking", [
-        new Lint.Replacement(0, 0, `jest.unmock("react-tracking")\n`),
-      ])
+    return this.applyWithWalker(
+      new DeMorgansWalker(sourceFile, this.getOptions())
+    )
+  }
+}
 
-      return [new Lint.RuleFailure(sourceFile, 0, 0, message, "tracking", fix)]
+
+// The walker takes care of all the work.
+class DeMorgansWalker extends Lint.RuleWalker {
+  /**
+   * TODO: How do I cast things in ts-check documents?
+  //  * @param {ts.IfStatement} node
+   */
+  visitIfStatement(node) {
+    const {expression} = node
+    if (utils.isBinaryExpression(expression)) {  
+      if (this.isNegatedBooleanExpression(expression.left) && this.isNegatedBooleanExpression(expression.right)) {
+        // We have two negated operands inside a 
+        if (expression.operatorToken.kind == ts.SyntaxKind.AmpersandAmpersandToken) {
+          this.addFailureAtNode(expression, "detected (!a && !b)")
+        } else if (expression.operatorToken.kind == ts.SyntaxKind.BarBarToken) {
+          this.addFailureAtNode(expression, "detected (!a || !b)")
+        }
+      }
     }
 
-    return []
+    // call the base version of this visitor to actually parse this node
+    super.visitIfStatement(node);
+  }
+
+  isNegatedBooleanExpression(node) {
+    return node.kind == ts.SyntaxKind.PrefixUnaryExpression &&
+      node.operator == ts.SyntaxKind.ExclamationToken
   }
 }
 
