@@ -1,3 +1,27 @@
-export default function hello() {
-  console.log("Hello World")
+const a = true
+const b = true
+
+// These should trigger the linter rule.
+if (!a && !b) {
+  console.log("hey")
+}
+if (!a || !b) {
+  console.log("hey")
+}
+
+while (!a || !b) {
+  console.log("infinite loop")
+}
+
+// Already been fixed, shouldn't change.
+if (!(a || b)) {
+  console.log("hey")
+}
+
+if (!(a && b)) {
+  console.log("hey")
+}
+
+while (!(a && b)) {
+  console.log("infinite loop")
 }
