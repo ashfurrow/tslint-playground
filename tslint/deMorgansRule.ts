@@ -6,6 +6,10 @@ import { BinaryExpression, IfStatement, Node, PrefixUnaryExpression, SourceFile,
 This is really cool: https://astexplorer.net
 */
 
+/**
+ * Rule to minimize the number of exclamation points in a file through foolish
+ * use of DeMorgan's law. Do no use the rule, it is for pedagogy only.
+ */
 export class Rule extends Rules.AbstractRule {
   apply(sourceFile: SourceFile) {
     return this.applyWithWalker(new DeMorgansWalker(sourceFile, this.getOptions()))
@@ -14,26 +18,20 @@ export class Rule extends Rules.AbstractRule {
 
 // The walker takes care of all the work.
 class DeMorgansWalker extends RuleWalker {
-  public visitIfStatement(node: IfStatement) {
-    const { expression } = node // expression is the part of `if (...)` that is in the parens
-
-    if (
-      isBinaryExpression(expression) &&
-      this.isNegatedBooleanExpression(expression.left) &&
-      this.isNegatedBooleanExpression(expression.right)
-    ) {
-      switch (expression.operatorToken.kind) {
+  public visitBinaryExpression(node: BinaryExpression) {
+    if (this.isNegatedBooleanExpression(node.left) && this.isNegatedBooleanExpression(node.right)) {
+      switch (node.operatorToken.kind) {
         case SyntaxKind.AmpersandAmpersandToken:
-          this.addFailureAtNode(expression, "detected (!a && !b)", this.deMorganifyIfStatement(expression, "||"))
+          this.addFailureAtNode(node, "detected (!a && !b)", this.deMorganifyIfStatement(node, "||"))
           break
         case SyntaxKind.BarBarToken:
-          this.addFailureAtNode(expression, "detected (!a || !b)", this.deMorganifyIfStatement(expression, "&&"))
+          this.addFailureAtNode(node, "detected (!a || !b)", this.deMorganifyIfStatement(node, "&&"))
           break
       }
     }
 
     // call the base version of this visitor to actually parse this node
-    super.visitIfStatement(node)
+    super.visitBinaryExpression(node)
   }
 
   deMorganifyIfStatement(expression: BinaryExpression, middle: string): Replacement {
