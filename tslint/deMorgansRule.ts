@@ -1,5 +1,6 @@
 import { Replacement, Rules, RuleWalker } from "tslint"
-import { BinaryExpression, IfStatement, Node, PrefixUnaryExpression, SourceFile, SyntaxKind } from "typescript"
+import { isPrefixUnaryExpression } from "tsutils"
+import { BinaryExpression, Node, PrefixUnaryExpression, SourceFile, SyntaxKind } from "typescript"
 
 /**
  * Rule to minimize the number of exclamation points in a file through foolish
@@ -37,9 +38,8 @@ class DeMorgansWalker extends RuleWalker {
   }
 
   isNegatedBooleanExpression(node: Node) {
-    return (
-      node.kind === SyntaxKind.PrefixUnaryExpression &&
-      (node as PrefixUnaryExpression).operator === SyntaxKind.ExclamationToken
-    )
+    if (isPrefixUnaryExpression(node)) {
+      return node.operator === SyntaxKind.ExclamationToken
+    }
   }
 }
