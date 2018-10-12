@@ -1,10 +1,5 @@
 import { Replacement, Rules, RuleWalker } from "tslint"
-import { isBinaryExpression } from "tsutils"
 import { BinaryExpression, IfStatement, Node, PrefixUnaryExpression, SourceFile, SyntaxKind } from "typescript"
-
-/*
-This is really cool: https://astexplorer.net
-*/
 
 /**
  * Rule to minimize the number of exclamation points in a file through foolish
