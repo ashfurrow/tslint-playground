@@ -13,6 +13,8 @@ while (!a || !b) {
   console.log("infinite loop")
 }
 
+const c = !a && !b ? "asd" : "efg"
+
 // Already been fixed, shouldn't change.
 if (!(a || b)) {
   console.log("hey")
@@ -25,3 +27,5 @@ if (!(a && b)) {
 while (!(a && b)) {
   console.log("infinite loop")
 }
+
+const d = !(a || b) ? "asd" : "efg"
