@@ -15,6 +15,10 @@ while (!a || !b) {
 
 const c = !a && !b ? "asd" : "efg"
 
+/* This code can go to hell! */
+
+// TODO: This comment should be flagged.
+
 // Already been fixed, shouldn't change.
 if (!(a || b)) {
   console.log("hey")
