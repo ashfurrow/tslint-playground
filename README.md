@@ -2,6 +2,7 @@
 
 This is a repo where I play around with TSLint custom rules. The rules are in the [`tslint`](https://github.com/ashfurrow/tslint-playground/tree/master/tslint) directory. Here's the list so far:
 
+- [`noBadWordsRule.ts](https://github.com/ashfurrow/tslint-playground/blob/master/tslint/noBadWordsRule.ts) uses the [bad-words](https://www.npmjs.com/package/bad-words) NPM module to forbid bad words in comments. Also provides options for custom list of bad words.
 - [`deMorgansRule.ts`](https://github.com/ashfurrow/tslint-playground/blob/master/tslint/deMorgansRule.ts) uses the TypeScript AST to "optimize" files by removing unnecessary exclamation marks through [DeMorgan's Law](https://en.wikipedia.org/wiki/De_Morgan%27s_laws). Please don't use it for real, it was for learning.
 
 ## Useful resources
