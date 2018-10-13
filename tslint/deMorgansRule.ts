@@ -1,26 +1,26 @@
-import { Replacement, Rules, RuleWalker } from "tslint"
-import { isPrefixUnaryExpression } from "tsutils"
-import { BinaryExpression, Node, PrefixUnaryExpression, SourceFile, SyntaxKind } from "typescript"
+import * as Lint from "tslint"
+import * as utils from "tsutils"
+import * as ts from "typescript"
 
 /**
  * Rule to minimize the number of exclamation points in a file through foolish
  * use of DeMorgan's law. Do no use the rule, it is for pedagogy only.
  */
-export class Rule extends Rules.AbstractRule {
-  apply(sourceFile: SourceFile) {
+export class Rule extends Lint.Rules.AbstractRule {
+  apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
     return this.applyWithWalker(new DeMorgansWalker(sourceFile, this.getOptions()))
   }
 }
 
 // The walker takes care of all the work.
-class DeMorgansWalker extends RuleWalker {
-  public visitBinaryExpression(node: BinaryExpression) {
+class DeMorgansWalker extends Lint.RuleWalker {
+  public visitBinaryExpression(node: ts.BinaryExpression) {
     if (this.isNegatedBooleanExpression(node.left) && this.isNegatedBooleanExpression(node.right)) {
       switch (node.operatorToken.kind) {
-        case SyntaxKind.AmpersandAmpersandToken:
+        case ts.SyntaxKind.AmpersandAmpersandToken:
           this.addFailureAtNode(node, "detected (!a && !b)", this.deMorganifyIfStatement(node, "||"))
           break
-        case SyntaxKind.BarBarToken:
+        case ts.SyntaxKind.BarBarToken:
           this.addFailureAtNode(node, "detected (!a || !b)", this.deMorganifyIfStatement(node, "&&"))
           break
       }
@@ -30,16 +30,16 @@ class DeMorgansWalker extends RuleWalker {
     super.visitBinaryExpression(node)
   }
 
-  deMorganifyIfStatement(expression: BinaryExpression, middle: string): Replacement {
-    const left = expression.left as PrefixUnaryExpression
-    const right = expression.right as PrefixUnaryExpression
+  deMorganifyIfStatement(expression: ts.BinaryExpression, middle: string): Lint.Replacement {
+    const left = expression.left as ts.PrefixUnaryExpression
+    const right = expression.right as ts.PrefixUnaryExpression
     const newIfExpression = `!(${left.getChildAt(1).getFullText()} ${middle} ${right.getChildAt(1).getFullText()})`
-    return Replacement.replaceFromTo(expression.getStart(), expression.getEnd(), newIfExpression)
+    return Lint.Replacement.replaceFromTo(expression.getStart(), expression.getEnd(), newIfExpression)
   }
 
-  isNegatedBooleanExpression(node: Node) {
-    if (isPrefixUnaryExpression(node)) {
-      return node.operator === SyntaxKind.ExclamationToken
+  isNegatedBooleanExpression(node: ts.Node) {
+    if (utils.isPrefixUnaryExpression(node)) {
+      return node.operator === ts.SyntaxKind.ExclamationToken
     }
   }
 }
