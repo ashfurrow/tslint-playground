@@ -4,7 +4,7 @@ import * as utils from "tsutils"
 import * as ts from "typescript"
 
 interface Options {
-  filter: any
+  filter: any // The bad-words module has no types on DefinitelyTyped, so we need to use any.
 }
 
 /**
